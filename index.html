@@ -1,98 +1,693 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Berkant & Aluş</title>
+  <title>Berkant & Aluş ❤️</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
+
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <style>
+    /* --- GENEL TASARIM --- */
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #fff6f9;
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 100%);
       margin: 0;
       padding: 0;
       text-align: center;
-      color: #333;
+      color: #4a4a4a;
+      overflow-x: hidden;
     }
+
+    /* --- GİRİŞ EKRANI (LOGIN) --- */
+    #login-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #2c001e; 
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      transition: opacity 1s ease;
+    }
+    #login-screen h2 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 3em;
+      margin-bottom: 20px;
+      color: #ff99ac;
+    }
+    .login-input {
+      padding: 15px;
+      font-size: 1.2em;
+      border-radius: 30px;
+      border: 2px solid #ff99ac;
+      outline: none;
+      text-align: center;
+      width: 200px;
+      margin-bottom: 20px;
+    }
+    .login-btn {
+      padding: 10px 40px;
+      font-size: 1.2em;
+      background: #d63384;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+    }
+    .error-msg {
+      color: #ff4d4d;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* --- UÇUŞAN KALPLER --- */
+    .heart-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+    .heart {
+      position: absolute;
+      bottom: -100px;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 182, 193, 0.6);
+      transform: rotate(45deg);
+      animation: floatUp 10s linear infinite;
+    }
+    .heart::before, .heart::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 182, 193, 0.6);
+      border-radius: 50%;
+    }
+    .heart::before { top: -10px; left: 0; }
+    .heart::after { top: 0; left: -10px; }
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(45deg) scale(0.5); opacity: 0; }
+      20% { opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(45deg) scale(1.2); opacity: 0; }
+    }
+
+    /* --- HEADER --- */
     header {
-      background: #ffccd5;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(5px);
       padding: 40px 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-bottom-left-radius: 50% 20px;
+      border-bottom-right-radius: 50% 20px;
+      box-shadow: 0 5px 15px rgba(255, 105, 180, 0.2);
     }
     header h1 {
+      font-family: 'Dancing Script', cursive;
       margin: 0;
-      font-size: 2.5em;
-      color: #b30059;
+      font-size: 3em;
+      color: #d63384;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     }
     header p {
-      font-size: 1.2em;
-      color: #660033;
-    }
-    .gallery {
-      margin: 40px auto;
-      max-width: 800px;
-    }
-    .gallery img {
-      width: 90%;
-      max-width: 600px;
-      margin: 20px auto;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .note {
-      margin: 40px auto;
-      max-width: 700px;
-      padding: 20px;
-      background: #ffeef5;
-      border-radius: 20px;
       font-size: 1.1em;
-      color: #4d0039;
+      color: #884d68;
+      margin-top: 10px;
     }
+
+    /* --- SAYAÇ --- */
+    .timer-box {
+      background: #fff;
+      display: inline-block;
+      padding: 12px 30px;
+      margin: 25px auto;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(214, 51, 132, 0.2);
+      border: 2px solid #ffccd5;
+    }
+    #timer {
+      font-size: 1.1em;
+      font-weight: bold;
+      color: #b30059;
+    }
+
+    /* --- SEVGİ JENERATÖRÜ --- */
+    .love-generator {
+      background: white;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+      border: 1px dashed #d63384;
+    }
+    .love-btn {
+      background: #b30059;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 1em;
+      margin-bottom: 15px;
+    }
+    #love-reason {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.8em;
+      color: #d63384;
+      min-height: 40px;
+    }
+
+    /* --- HARİTA BÖLÜMÜ --- */
+    .map-container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 10px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 10px;
+      z-index: 1; 
+    }
+
+    /* --- NOT ALANI --- */
+    .note {
+      background: white;
+      max-width: 650px;
+      margin: 40px auto;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.05);
+      position: relative;
+      border: 1px solid #ffeef5;
+    }
+    .note h2 {
+      font-family: 'Dancing Script', cursive;
+      color: #d63384;
+      font-size: 2.2em;
+    }
+
+    /* --- BUTONLAR --- */
+    .buttons-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin: 30px 0;
+    }
+    .special-btn {
+      border: none;
+      padding: 15px 35px;
+      font-size: 1.1em;
+      color: white;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(214, 51, 132, 0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+      font-family: 'Nunito', sans-serif;
+      font-weight: bold;
+    }
+    .poem-btn-style { background: linear-gradient(45deg, #ff99ac, #d63384); }
+    .gallery-btn-style { background: linear-gradient(45deg, #ffc3a0, #ffafbd); color: #5a3e50; }
+    .special-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(214, 51, 132, 0.5);
+    }
+
+    /* --- MODALLAR --- */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background-color: #fffafc;
+      margin: 5% auto;
+      padding: 40px;
+      border: 2px solid #d63384;
+      border-radius: 15px;
+      width: 85%;
+      max-width: 700px;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      text-align: center;
+    }
+    .gallery-modal-content { max-width: 900px; background-color: #fff; }
+    .close-btn {
+      color: #aaa;
+      float: right;
+      font-size: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      position: absolute;
+      right: 20px;
+      top: 10px;
+    }
+    
+    /* --- GALERİ & LIGHTBOX --- */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px 0;
+    }
+    .gallery-item {
+      background: #fff;
+      padding: 8px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      border: 1px solid #eee;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    .gallery-note {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.2em;
+      color: #555;
+      margin-top: 5px;
+    }
+    #lightbox {
+      display: none;
+      position: fixed;
+      z-index: 3000;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.95);
+      justify-content: center;
+      align-items: center;
+    }
+    #lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border: 4px solid #fff;
+      border-radius: 5px;
+    }
+    #lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 40px;
+      cursor: pointer;
+    }
+
+    /* --- MÜZİK ÇALAR --- */
+    .music-player {
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      display: inline-block;
+      margin: 40px auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 90%;
+    }
+    .playlist {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+      text-align: left;
+    }
+    .playlist li {
+      background: #fff0f5;
+      margin-bottom: 10px;
+      padding: 10px 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .playlist li:hover { background: #ffccd5; }
+    .current-song {
+      font-weight: bold;
+      color: #d63384;
+      display: block;
+      margin-bottom: 10px;
+    }
+
     footer {
-      background: #ffccd5;
+      background: #b30059;
+      color: white;
       padding: 20px;
-      font-size: 0.9em;
-      color: #660033;
-    }
-    audio {
       margin-top: 20px;
     }
   </style>
 </head>
 <body>
+
+  <div id="login-screen">
+    <h2>Berkant & Aluş ❤️</h2>
+    <p>Giriş yapmak için şifreyi giriniz:</p>
+    <p style="font-size:0.8em; opacity:0.7;">(İpucu: Bizim tarihimiz - GGAAYY)</p>
+    <input type="password" id="passwordInput" class="login-input" placeholder="Şifre">
+    <button class="login-btn" onclick="checkPassword()">Giriş Yap</button>
+    <p class="error-msg" id="errorMsg">Şifre yanlış sevgilim, tekrar dene! 🥺</p>
+  </div>
+
+  <div class="heart-bg" id="heart-bg"></div>
+
   <header>
     <h1>Hoş geldin Aluşum 💗</h1>
-    <p>Bu site senin için, sadece sana özel hazırlandı...</p>
+    <p>Seninle geçen her saniye çok değerli...</p>
+    <div class="timer-box">
+      Birlikte geçen zaman:<br>
+      <span id="timer">Hesaplanıyor...</span>
+    </div>
   </header>
 
-  <section class="gallery">
-    <img src="ba1.jpg" alt="İlk date günümüz">
-    <p>Bu fotoğraf, birlikte geçirdiğimiz ilk güzel günün hatırası 💫</p>
-    <img src="ba4.jpg" alt="Biz">
-    <p>Uzun bir yolculuğun, ilk adımları❤️ </p>
-    <img src="ba3.jpg" alt="Kalp içinde kalp 💕">
-    <p>Kalp içinde kalp💕</p>
+  <section class="map-container">
+    <h2 style="font-family: 'Dancing Script', cursive; color: #b30059;">Bizim Haritamız 🗺️</h2>
+    <p>Aşkımızın Coğrafyası...</p>
+    <div id="map"></div>
+    <p style="font-size:0.9em; margin-top:10px; color:#888;">(Haritayı uzaklaştırarak Bandırma'yı da görebilirsin)</p>
+  </section>
+
+  <section class="love-generator">
+    <h3>Bugün seni neden seviyorum? 🎰</h3>
+    <div id="love-reason">Butona tıkla ve gör...</div>
+    <button class="love-btn" onclick="generateLove()">Bana Söyle! 💖</button>
   </section>
 
   <section class="note">
-    <h2>Seninle geçen her an bir şiir gibi</h2>
-    <p>Aluşum,<br>
-    Varlığınla hayatımın en güzel yanını keşfettim. Her gülüşün içimde yeni bir bahar açtırıyor. Bazen uzak olsak da, kalbim hep sana yakın. Bu küçük sayfa, sana olan sevgimin minik bir yansıması. Nice günleri birlikte yazmak dileğiyle...<br><br>
-    Seni çok seviyorum.<br><br>
-    - Berkant 💘</p>
+    <h2>Sen benim en güzel şiirimsin...</h2>
+    <p>
+      Aluşum,<br><br>
+      Varlığınla hayatımın en güzel yanını keşfettim. Haritalarda yollar bazen karışık olabilir ama benim pusulam hep seni gösteriyor. 
+      Bu site, sadece sana özel, dijital dünyadaki küçük evimiz.<br><br>
+      <strong>Seni çok seviyorum.</strong><br>
+      - Berkant 💘
+    </p>
+  </section>
+
+  <section class="buttons-container">
+    <button class="special-btn poem-btn-style" onclick="openModal('poemModal')">Sana Yazdığım Şiirler 📜</button>
+    <button class="special-btn gallery-btn-style" onclick="openModal('galleryModal')">Fotoğraflar ve Anılarımız 📸</button>
   </section>
 
   <section>
-    <h3>Şarkımız 🎵</h3>
-    <p>Emre Nalbantoğlu – Hanımefendi</p>
-    <audio controls autoplay loop>
-      <source src="hanimefendi.mp3.mp3" type="audio/mpeg">
-      Tarayıcınız bu ses dosyasını desteklemiyor.
-    </audio>
+    <div class="music-player">
+      <h3>Bizim Şarkılarımız 🎵</h3>
+      <span class="current-song" id="currentSongTitle">Çalıyor: Hanımefendi</span>
+      <audio id="mainAudio" controls>
+        <source src="hanimefendi.mp3.mp3" type="audio/mpeg">
+      </audio>
+      <ul class="playlist">
+        <li onclick="playMusic('hanimefendi.mp3.mp3', 'Emre Nalbantoğlu – Hanımefendi')">🎵 Hanımefendi</li>
+        <li onclick="playMusic('sarki1.mp3', 'Benim bestem - 1 ❤️')">🎹 Benim bestem 1</li>
+        <li onclick="playMusic('sarki2.mp3', 'Benim bestem - 2 🎼')">🎹 Benim bestem 2</li>
+      </ul>
+    </div>
   </section>
 
   <footer>
-    ❤️ Berkant & Aluş – Sadece ikimizin 💞
+    ❤️ Berkant & Aluş – Sonsuza dek... 💞
   </footer>
+
+  <div id="poemModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('poemModal')">&times;</span>
+      <h2>Şiir Defterim</h2>
+      <div class="poem-title">Sonsuz Bir Nevbahar 🌌</div>
+      <div class="poem-text">
+        Sonsuz bir nevbaharın gölgesinde arıyorum ruhumu..<br>
+        Senin verdiğin çerağ aydınlatıyor yalnız çehremi sevgilim..<br>
+        Gökyüzünden inen ışıkla buluyorum yolumun üzerindeki iki çakıl taşını,<br>
+        Sonrasında bir sen kalıyorsun fezanın verdiği bendeki nefesin son demlerinden..<br><br>
+        Ardından dalıyorum derin hülyalara..<br>
+        Senin nazenin elinle tutunuyorum bir dala,<br>
+        Sonra derinine iniyorum o sessiz payidar rüyanın..<br>
+        Bir bakıyorum ki yüreğim; sana demirlemiş sessiz bir uzay istasyonu.<br> 
+        Dışarıda evrenin her bir kesimi buz, içerisi ise tek kişilik bir oksijen kaynağı...<br><br>
+        Ve sevgilim biz; fark edilmemiş bir uydunun dünya atmosferine girişi gibiyiz;<br>
+        Sessiz, beklenmedik ve yanmaya hazır...
+      </div>
+
+      <div class="poem-title">Bizim Hikayemiz 🏡</div>
+      <div class="poem-text">
+        Sahiden biz miydik sonsuz uğultu seslerinin delice aktığı bir ormanda..<br>
+        Kendinden olma bir evin çatısının altında,<br>
+        Bir yağmur yağsa da bardaktan boşalırcasına,<br>
+        Ardında öpüşsek diye bekleyen sahiden bizden başkası olamazdı...<br>
+        Kavurucu bir güneşin ortasında yağan yağmurun,<br>
+        Arkasından çıkan gökkuşağının altında el ele yürümekti belki ilacımız..<br><br>
+        Sonra gecenin kapladığı sessizliği derin olan bir ormanın içinde ikimizdik..<br>
+        Almıştık elimize patlamış mısırımızı, açmıştık romantik ama bir o kadarda komedi filmimizi..<br>
+        Minderlerimizin üstünde yan yana izliyorduk koca ormanda bir sen, bir ben,<br>
+        Bir de tatlı bir kedimizin miyavı eşliğinde..<br><br>
+        Ama unutmak ne mümkündü bir kaç ağlama sesi yükseliyordu üst katlardan,<br>
+        Koşuyorduk hunharca seslere doğru,<br>
+        Bebek arabaları dolu koridordan geçerken mavi ve pembenin eşsiz tonundaki oda alıyordu gözlerimizi..<br>
+        Sonra kapının eşiğinde usulca izliyorduk kesilen seslerin ardındaki ikizlerimizi....
+      </div>
+
+      <div class="poem-title">Pusulam Sensin 🧭</div>
+      <div class="poem-text">
+        Masmavi bir gökyüzünün altında açıyorum gözlerimi..<br>
+        Yanı başımızdaki dalgalı bir deniz sarıyor ruhumu..<br>
+        Uçsuz bucaksız bir rüzgar dalgalandırıyor saçlarını..<br>
+        Ve sevgilim, senin yanımda olduğun her gün parlıyor kalbim...<br><br>
+        Bazen sessiz sedasız seviyorum seni;<br>
+        Serçeler gözyaşlarını akıtmadan, sabahları horozlar daha ötmeden,<br>
+        Papatyalar dalından kopmadan, baharın yaprakları henüz açmamışken,<br>
+        Öyle seviyorum işte seni sessiz ve sakin dingin bir okyanusun ortasında kalmış gibi...<br>
+        Sadece pusulam senmişsin de kurtuluşum yokmuş gibi seviyorum sevgilim...<br><br>
+        Ardından Güneş çıkıyor tepeden,<br>
+        Kardelenler açıyor dört bir yanda..<br>
+        Gülüşün baharı getirmiş bütün yurda haberimiz yok sevgilim..<br>
+        Doğayı uyandırmışsın, pembeye dönmüş tomurcuklar..<br>
+        Gözlerindeki yeşillik baharı çağırmış sabahında ordaymış gibi..<br><br>
+        Ardından tek tek sular serpiştirmişsin yüreğime,<br>
+        Papatyalar dolmuş taşmış kalbimin derinliklerinde sanki..<br>
+        İşte öyle seviyorum seni,<br>
+        Gözlerin, gülüşün, saçların, dudakların..<br>
+        Hepsi solmuş bir geceyi parlatan bir Ay minvalinde sevgilim...
+      </div>
+
+      <div class="poem-title">Çıkma Teklifimm 🏍️</div>
+      <div class="poem-text">
+        Soğuk vuran rüzgarlı bir günün ardında,<br>
+        Üşüme diyordum sessizce..<br>
+        Masmavi bir denizin kenarında izliyordum gülüşlerini..<br>
+        Birden seyre dalıyordum gözlerinle gülüşün arasındaki ahenk dolu mısrayı...<br>
+        Ama fayda etmiyordu ısrarlarım seni motora bindirmeye,<br>
+        Gerçi bilmiyordun ki motorun üstünde, yüzüne vuran rüzgarın bağımlısı olacağını..<br><br>
+        Kaybedişlerim ağır gelmeye başlamıştı artık bir oyunun ardında<br>
+        Peki söylemiş miydim sana seni ilk gördüğümde asıl yenildiğimi..<br>
+        O yüzden diyorum ki sana bir uçan leyleğe mi bağlıydı dileklerim,<br>
+        Yoksa kaderimi elime almam mı gerekliydi?<br><br>
+        İşte bu ikilemlerin arasında geçmişten bir soru lazımdı bize<br>
+        Geri gelmeliydi artık çıkma teklifi...<br><br>
+        Şimdi diyorum ki size <strong>"Hanımefendi"</strong><br>
+        Tatlı bir günün içinde, bu canlıların huzurunda;<br>
+        <em>Benimle çıkar mısınız??</em>
+      </div>
+    </div>
+  </div>
+
+  <div id="galleryModal" class="modal">
+    <div class="modal-content gallery-modal-content">
+      <span class="close-btn" onclick="closeModal('galleryModal')">&times;</span>
+      <h2>Anı Duvarımız 📸</h2>
+      <div class="gallery-grid">
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="ba1.jpg" alt="Foto">
+          <div class="gallery-note">İlk günümüzün heyecanı 💫</div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="ba4.jpg" alt="Foto">
+          <div class="gallery-note">Bizim hikayemiz ❤️</div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+           <img src="ba3.jpg" alt="Foto">
+           <div class="gallery-note">Kalp içinde kalp 💕</div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+           <img src="ayna ayna söyle bana.jpeg" alt="Foto">
+           <div class="gallery-note">Ayna ayna söyle bana 💕</div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+           <img src="ayrıntıda gs gözlüğümde varr.jpeg" alt="Foto">
+           <div class="gallery-note">Ayrıntıda gs gözlüğümde varr ✨</div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+           <img src="bowling de oynamak lazım.jpeg" alt="Foto">
+           <div class="gallery-note">Bowling de oynamak lazım ❤️</div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+           <img src="deniz kum güneşş.jpeg" alt="Foto">
+           <div class="gallery-note">Deniz kum güneşş 💫</div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+           <img src="E istanbulu eklmeden olmazdı.jpeg" alt="Foto">
+           <div class="gallery-note">E istanbulu eklmeden olmazdı ❤️</div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+           <img src="en güzel yılbaşı.jpeg" alt="Foto">
+           <div class="gallery-note">En güzel yılbaşı 💕</div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+           <img src="kaf sin kaf sin kaf.jpeg" alt="Foto">
+           <div class="gallery-note">kaf sin kaf sin kaf ❤️</div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+           <img src="konserde yapalım biraz.jpeg" alt="Foto">
+           <div class="gallery-note">Konserde yapalım biraz ❤️</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="lightbox" onclick="closeLightbox()">
+    <span id="lightbox-close">&times;</span>
+    <img id="lightbox-img" src="" alt="Büyük Resim">
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // --- 1. ŞİFRE KONTROLÜ (240325) ---
+    function checkPassword() {
+      const input = document.getElementById('passwordInput').value;
+      if (input === "240325") { 
+        document.getElementById('login-screen').style.opacity = "0";
+        setTimeout(() => {
+          document.getElementById('login-screen').style.display = "none";
+        }, 1000);
+      } else {
+        document.getElementById('errorMsg').style.display = "block";
+      }
+    }
+
+    // --- 2. TARİH AYARI (24 Mart 2025) ---
+    // Aylar 0'dan başlar (Ocak=0, Şubat=1, Mart=2)
+    const startDate = new Date(2025, 2, 24); 
+
+    // --- 3. SEVGİ JENERATÖRÜ ---
+    const reasons = [
+      "Çünkü gülüşün dünyamı aydınlatıyor.",
+      "Çünkü seninle her şey daha güzel.",
+      "Çünkü gözlerin benim evim.",
+      "Çünkü sesin en sevdiğim şarkı.",
+      "Çünkü yanındayken zaman duruyor.",
+      "Çünkü kalbin, tanıdığım en temiz yer.",
+      "Çünkü sen benim en iyi arkadaşımsın.",
+      "Çünkü sadece 'sen' olduğun için."
+    ];
+    function generateLove() {
+      const random = Math.floor(Math.random() * reasons.length);
+      document.getElementById("love-reason").innerText = reasons[random];
+    }
+
+    // --- 4. HARİTA AYARLARI (İzmir ve Çevresi) ---
+    // Harita merkezi: İzmir'e odaklı
+    var map = L.map('map').setView([38.4500, 27.1000], 10); 
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    function addMarker(lat, lng, text) {
+      L.marker([lat, lng]).addTo(map)
+        .bindPopup(text);
+    }
+
+    // -- KONUMLARIN --
+    // 1. Seni ilk gördüğüm yer (İKÇÜ)
+    addMarker(38.5135, 27.0315, "<b>İzmir Katip Çelebi Üni.</b><br>Seni ilk burada gördüm ❤️");
+
+    // 2. İlk buluştuğumuz yer (Bostanlı Sahili)
+    addMarker(38.4554, 27.0980, "<b>Bostanlı Sahili</b><br>İlk buluşmamız... 💫");
+
+    // 3. Çıkamadığınız yer (Hilltown AVM)
+    addMarker(38.4735, 27.1120, "<b>İzmir Hilltown AVM</b><br>Asla çıkamadığımız o yer :)");
+
+    // 4. Onun evi (Mithatpaşa Mh.)
+    addMarker(38.4050, 27.0850, "<b>Aluş'un Evi</b><br>Konak ❤️");
+
+    // 5. Senin evin (Bandırma)
+    addMarker(40.3530, 27.9700, "<b>Berkant'ın Evi</b><br>Bandırma 🏠");
+
+
+    // --- DİĞER FONKSİYONLAR ---
+    function updateTimer() {
+      const now = new Date();
+      const diff = now - startDate;
+      if (diff < 0) { document.getElementById("timer").innerText = "Henüz tarih gelmedi..."; return; }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      const el = document.getElementById("timer");
+      if (el) el.innerText = `${days} Gün, ${hours} Saat, ${minutes} Dakika, ${seconds} Saniye`;
+    }
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    function createHearts() {
+      const container = document.getElementById('heart-bg');
+      if (!container) return;
+      for (let i = 0; i < 15; i++) {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.animationDuration = Math.random() * 5 + 5 + 's';
+        heart.style.animationDelay = Math.random() * 5 + 's';
+        container.appendChild(heart);
+      }
+    }
+    createHearts();
+
+    function openModal(modalId) { document.getElementById(modalId).style.display = "block"; }
+    function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
+    
+    function openLightbox(el) {
+      document.getElementById('lightbox-img').src = el.querySelector('img').src;
+      document.getElementById('lightbox').style.display = "flex";
+    }
+    function closeLightbox() { document.getElementById('lightbox').style.display = "none"; }
+
+    function playMusic(file, title) {
+      const audio = document.getElementById('mainAudio');
+      document.getElementById('currentSongTitle').innerText = "Çalıyor: " + title;
+      audio.src = file;
+      audio.play();
+    }
+
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) event.target.style.display = "none";
+    }
+  </script>
 </body>
 </html>
