@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AŞYM Sınav Giriş Belgesi</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F7F1E1;
+    --paper-dark:#EDE4CC;
+    --ink:#1C2541;
+    --seal:#B3222C;
+    --rose:#C9366A;
+    --gold:#A9792C;
+    --hair:#C9BFA0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper-dark);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(0,0,0,0.03) 0, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(0,0,0,0.03) 0, transparent 40%);
+    color:var(--ink);
+    font-family:'Noto Serif', serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .stamp-font{font-family:'Special Elite', monospace;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+
+  .booklet{
+    width:100%;
+    max-width:640px;
+    background:var(--paper);
+    border:1px solid var(--hair);
+    box-shadow:0 2px 4px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.12);
+    position:relative;
+    min-height:560px;
+  }
+  .booklet::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border:1px solid var(--hair);
+    pointer-events:none;
+  }
+  .letterhead{
+    text-align:center;
+    padding:22px 20px 14px;
+    border-bottom:2px solid var(--ink);
+    margin:10px 10px 0;
+  }
+  .letterhead .kurum{
+    font-family:'Special Elite', monospace;
+    font-size:1.5em;
+    letter-spacing:2px;
+    color:var(--ink);
+  }
+  .letterhead .alt{
+    font-size:0.78em;
+    color:#6b6455;
+    letter-spacing:1px;
+    margin-top:4px;
+  }
+
+  .screen{
+    display:none;
+    padding:28px 34px 34px;
+    animation:fadeIn .5s ease;
+  }
+  .screen.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  /* --- GİRİŞ BELGESİ --- */
+  #cover .foto-kutu{
+    width:110px; height:130px;
+    border:2px solid var(--ink);
+    margin:0 auto 18px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:2.2em;
+    background:repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(0,0,0,0.03) 6px, rgba(0,0,0,0.03) 12px);
+  }
+  #cover h1{
+    text-align:center;
+    font-family:'Special Elite', monospace;
+    font-size:1.4em;
+    margin:0 0 6px;
+  }
+  #cover .aday-bilgi{
+    margin:22px 0;
+    border:1px solid var(--hair);
+    padding:16px 20px;
+  }
+  .satir{
+    display:flex; justify-content:space-between;
+    padding:6px 0;
+    border-bottom:1px dotted var(--hair);
+    font-size:0.95em;
+  }
+  .satir:last-child{border-bottom:none;}
+  .satir b{color:#6b6455; font-weight:600; letter-spacing:0.3px;}
+  .satir span{font-family:'JetBrains Mono', monospace; font-weight:600;}
+
+  #cover p.aciklama{
+    text-align:center;
+    font-size:0.92em;
+    color:#4a4438;
+    line-height:1.6;
+    margin:18px 6px 26px;
+  }
+
+  .btn{
+    display:block;
+    margin:0 auto;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    font-family:'Special Elite', monospace;
+    font-size:1em;
+    letter-spacing:1px;
+    padding:14px 30px;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn:hover{background:var(--seal); transform:translateY(-2px);}
+  .btn:active{transform:translateY(0);}
+
+  /* --- SORU EKRANI --- */
+  .ust-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.85em;
+    color:#6b6455;
+    margin-bottom:6px;
+  }
+  .progress-track{
+    height:6px; background:var(--hair); margin-bottom:22px;
+    position:relative; overflow:hidden;
+  }
+  .progress-fill{
+    height:100%; background:var(--seal);
+    width:0%; transition:width .4s ease;
+  }
+  .etiket{
+    display:inline-block;
+    font-family:'Special Elite', monospace;
+    font-size:0.72em;
+    letter-spacing:1px;
+    padding:3px 10px;
+    margin-bottom:14px;
+    border:1px solid currentColor;
+  }
+  .etiket.kpss{color:var(--ink);}
+  .etiket.bonus{color:var(--rose); border-color:var(--rose);}
+
+  .soru-metni{
+    font-size:1.18em;
+    line-height:1.5;
+    margin:0 0 22px;
+    min-height:60px;
+  }
+
+  .secenekler{display:flex; flex-direction:column; gap:12px;}
+  .secenek{
+    display:flex; align-items:center; gap:14px;
+    cursor:pointer;
+    padding:8px 10px;
+    border:1px solid transparent;
+    transition:background .15s ease;
+  }
+  .secenek:hover{background:rgba(0,0,0,0.03);}
+  .secenek.disabled{cursor:default;}
+  .secenek.disabled:hover{background:none;}
+
+  .kabarcik{
+    width:30px; height:30px;
+    min-width:30px;
+    border-radius:50%;
+    border:2px solid var(--ink);
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.75em;
+    font-weight:600;
+  }
+  .kabarcik svg{position:absolute; inset:-2px;}
+  .kabarcik svg path{
+    fill:none; stroke:var(--ink); stroke-width:5; stroke-linecap:round;
+    stroke-dasharray:120; stroke-dashoffset:120;
+  }
+  .secenek.dolu .kabarcik svg path{
+    animation:cizim .45s ease-out forwards;
+  }
+  .secenek.dolu.yanlis .kabarcik svg path{stroke:var(--seal);}
+  .secenek.dolu.dogru .kabarcik svg path{stroke:#3a7d44;}
+  @keyframes cizim{to{stroke-dashoffset:0;}}
+
+  .secenek-metin{font-size:1em; line-height:1.4;}
+  .secenek.dogru-vurgu .secenek-metin{color:#3a7d44; font-weight:700;}
+  .secenek.yanlis-vurgu .secenek-metin{color:var(--seal); text-decoration:line-through; opacity:0.7;}
+
+  .geri-bildirim{
+    margin-top:20px;
+    padding:14px 16px;
+    border-left:4px solid var(--rose);
+    background:rgba(201,54,106,0.06);
+    font-size:0.95em;
+    display:none;
+  }
+  .geri-bildirim.gorunur{display:block; animation:fadeIn .35s ease;}
+
+  .devam-btn{margin-top:22px;}
+
+  /* --- SONUÇ BELGESİ --- */
+  #sonuc h1{
+    text-align:center;
+    font-family:'Special Elite', monospace;
+    font-size:1.5em;
+    margin:0 0 22px;
+    letter-spacing:1px;
+  }
+  .sonuc-kutu{
+    border:1px solid var(--hair);
+    padding:20px 22px;
+    position:relative;
+    margin-bottom:22px;
+  }
+  .muhur{
+    position:absolute;
+    top:-18px; right:8px;
+    width:96px; height:96px;
+    border-radius:50%;
+    border:3px double var(--seal);
+    color:var(--seal);
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    font-family:'Special Elite', monospace;
+    font-size:0.72em;
+    line-height:1.2;
+    transform:rotate(-14deg) scale(0.5);
+    opacity:0;
+    background:var(--paper);
+  }
+  .muhur.goster{
+    animation:muhurVur .5s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes muhurVur{
+    0%{transform:rotate(-14deg) scale(2); opacity:0;}
+    60%{transform:rotate(-14deg) scale(0.85); opacity:1;}
+    100%{transform:rotate(-14deg) scale(1); opacity:1;}
+  }
+  .puan-buyuk{
+    text-align:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:2.6em;
+    font-weight:700;
+    color:var(--ink);
+    margin:6px 0 2px;
+  }
+  .puan-alt{text-align:center; font-size:0.85em; color:#6b6455; letter-spacing:1px;}
+
+  .mektup{
+    font-size:1em;
+    line-height:1.75;
+    margin-top:22px;
+    padding-top:18px;
+    border-top:1px dashed var(--hair);
+  }
+  .imza{
+    text-align:right;
+    font-family:'Special Elite', monospace;
+    margin-top:14px;
+  }
+
+  .surpriz-notu{
+    margin-top:20px;
+    text-align:center;
+    font-size:0.9em;
+    color:var(--rose);
+    font-weight:600;
+  }
+
+  .kalp-yagmuru{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:5;}
+  .kalp-tanesi{
+    position:absolute; top:-40px; font-size:1.4em; opacity:0.85;
+    animation:dus linear forwards;
+  }
+  @keyframes dus{
+    to{transform:translateY(105vh) rotate(360deg); opacity:0;}
+  }
+
+  @media (max-width:480px){
+    .screen{padding:22px 18px 26px;}
+    .letterhead{padding:18px 14px 12px;}
+    .satir{font-size:0.85em;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="kalp-yagmuru" id="kalpYagmuru"></div>
+
+<div class="booklet">
+  <div class="letterhead">
+    <div class="kurum">AŞYM</div>
+    <div class="alt">AŞK SEÇME VE YERLEŞTİRME MERKEZİ · SINAV GİRİŞ BELGESİ</div>
+  </div>
+
+  <!-- KAPAK / GİRİŞ BELGESİ -->
+  <div class="screen active" id="cover">
+    <div class="foto-kutu">💗</div>
+    <h1>Sınav Giriş Belgesi</h1>
+    <div class="aday-bilgi">
+      <div class="satir"><b>ADAY</b><span>ALUŞ</span></div>
+      <div class="satir"><b>SINAV ADI</b><span>Aşk ve Genel Yetenek</span></div>
+      <div class="satir"><b>SORU SAYISI</b><span id="toplamSoruGoster">10</span></div>
+      <div class="satir"><b>SÜRE</b><span>Sınırsız 🙂</span></div>
+      <div class="satir"><b>SALON</b><span>Kalbimin İçi</span></div>
+    </div>
+    <p class="aciklama">
+      Sevgili aday, bu sınav gerçek KPSS formatında biraz terletici sorulardan ve aramıza özel bonus sürprizlerden oluşmaktadır.
+      Yanlış cevap sizi elemez, sadece güldürür. Sınav sonunda başarı belgeniz ve
+      küçük bir ödülünüz sizi bekliyor. Sınav görevlisi (Berkant) zihin açıklığı diler.
+    </p>
+    <button class="btn" onclick="sinaviBaslat()">SINAVA BAŞLA</button>
+  </div>
+
+  <!-- SORU EKRANI -->
+  <div class="screen" id="soruEkrani">
+    <div class="ust-bar">
+      <span> SORU <span id="soruNo">1</span>/<span id="toplamSoru">10</span></span>
+      <span id="puanGoster">PUAN: 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="ilerlemeCubugu"></div></div>
+    <div class="etiket" id="soruEtiket">GENEL KÜLTÜR</div>
+    <div class="soru-metni" id="soruMetni">Yükleniyor...</div>
+    <div class="secenekler" id="secenekler"></div>
+    <div class="geri-bildirim" id="geriBildirim"></div>
+    <button class="btn devam-btn" id="devamBtn" style="display:none" onclick="sonrakiSoru()">SONRAKİ SORU</button>
+  </div>
+
+  <!-- SONUÇ BELGESİ -->
+  <div class="screen" id="sonuc">
+    <h1>Sonuç Belgesi</h1>
+    <div class="sonuc-kutu">
+      <div class="muhur" id="muhurEl">AŞYM<br>ONAYLI<br>❤️</div>
+      <div class="puan-buyuk"><span id="dogruSayisi">0</span>/<span id="toplamSoru2">10</span></div>
+      <div class="puan-alt">DOĞRU CEVAP · SONUÇ: BAŞARILI</div>
+      <div class="mektup">
+        Aluşum, aslında bu sınavda kaç doğru yaptığının hiç önemi yok, çünkü sen zaten
+        hayatımın en büyük sınavını geçtin: kalbimi kazandın. KPSS'ye çalışırken bile
+        gülümsemene vesile olabildiysem ne mutlu bana. Seninle geçirdiğim her an,
+        cevabını bildiğim en güzel soru gibi.
+        <div class="imza">Sevgiyle,<br>Berkant 💘</div>
+      </div>
+      
+    </div>
+    <button class="btn" onclick="sinaviYenidenBaslat()">SINAVI TEKRAR ÇÖZ</button>
+  </div>
+</div>
+
+<script>
+const sorular = [
+  {
+    tip:"kpss", etiket:"TARİH",
+    soru:"Sivas Kongresi'nin ardından Milli Mücadele'nin sesini halka duyurmak amacıyla çıkarılan gazete aşağıdakilerden hangisidir?",
+    secenekler:["İrade-i Milliye","Hakimiyet-i Milliye","Ceride-i Resmiye","Minber"],
+    dogru:0
+  },
+  {
+    tip:"kpss", etiket:"COĞRAFYA",
+    soru:"Türkiye'de karstik yer şekillerinin (lapya, dolin, obruk) en yoğun olarak bulunduğu platolar aşağıdakilerden hangisinde birlikte verilmiştir?",
+    secenekler:["Çatalca - Kocaeli","Obruk - Cihanbeyli","Teke - Taşeli","Yazılıkaya - Uzunyayla"],
+    dogru:2
+  },
+  {
+    tip:"bonus", etiket:"BONUS: BİZİM TARİHİMİZ",
+    soru:"KPSS'yi bir anlığına kenara bırakalım. Takvimler hangi günü gösterdiğinde bizim için her şey resmi olarak çok daha güzel bir hal aldı?",
+    secenekler:["14 Şubat 2025","24 Mart 2025","1 Nisan 2025","30 Ağustos 2025"],
+    dogru:1
+  },
+  {
+    tip:"kpss", etiket:"VATANDAŞLIK",
+    soru:"1982 Anayasası'na göre aşağıdakilerden hangisi Cumhurbaşkanlığı Kararnamesi ile düzenlenemez?",
+    secenekler:["Sosyal ve ekonomik haklar","Siyasi haklar ve ödevler","Bakanlıkların kurulması","Üst kademe yöneticilerin atanması"],
+    dogru:1
+  },
+  {
+    tip:"kpss", etiket:"TARİH",
+    soru:"Osmanlı Devleti'nde ilk kağıt para (Kaime-i Mutebere) hangi padişah döneminde basılmıştır?",
+    secenekler:["II. Mahmud","Sultan Abdülaziz","II. Abdülhamid","Sultan Abdülmecid"],
+    dogru:3
+  },
+  {
+    tip:"kpss", etiket:"COĞRAFYA",
+    soru:"Ege Bölgesi'nde kırılma (faylanma) sonucu oluşan horst sistemine aşağıdaki dağlardan hangisi örnek gösterilebilir?",
+    secenekler:["Kaçkar Dağları","Erciyes Dağı","Kaz Dağları","Ağrı Dağı"],
+    dogru:2
+  },
+  {
+    tip:"kpss", etiket:"TARİH",
+    soru:"Mustafa Kemal Paşa, 'Siz orada yalnız düşmanı değil, milletin makûs talihini de yendiniz.' telgrafını kime ve hangi savaşın ardından çekmiştir?",
+    secenekler:["İsmet İnönü - II. İnönü Muharebesi","Fevzi Çakmak - Sakarya Meydan Muharebesi","Kazım Karabekir - Doğu Cephesi","Refet Bele - Aslıhanlar"],
+    dogru:0
+  },
+  {
+    tip:"bonus", etiket:"BONUS: SON BİZDEN SORU",
+    soru:"Hazır mola vermişken sorayım... Sana yazıp adadığım, belki de en güzel hislerimi anlatan o şarkının adı neydi?",
+    secenekler:["Suyun Sesi","Kalbim Bir Çerağdır","Hanımefendi","Nevbahar"],
+    dogru:1
+  },
+  {
+    tip:"kpss", etiket:"GENEL KÜLTÜR",
+    soru:"Cumhuriyet döneminin ilk kadın heykeltıraşı aşağıdakilerden hangisidir?",
+    secenekler:["Afife Jale","Sabiha Bengütaş","Mihri Müşfik","Muazzez İlmiye Çığ"],
+    dogru:1
+  },
+  {
+    tip:"kpss", etiket:"VATANDAŞLIK",
+    soru:"4721 sayılı Türk Medeni Kanunu'na göre gerçek kişilik ne zaman başlar?",
+    secenekler:["Ana rahmine düşüldüğü an","Ergin (reşit) olunduğu an","Nüfus kütüğüne kaydedildiği an","Çocuğun tam ve sağ doğduğu an"],
+    dogru:3
+  }
+];
+
+const yanlisMesajlari = [
+  "Eyvah, bu gerçek sınavda yakardı! Ama benim sınavımda hep geçersin. 💗",
+  "Şıklar hatalı bence, sen yanlış yapmazsın. 😉",
+  "ÖSYM affetmez ama ben affederim. Devam edelim! 🥹",
+  "Küçük bir nazar boncuğu olsun bu, moral bozmak yok. 🧿"
+];
+const dogruMesajlari = [
+  "Aferin, tam isabet! 🎯",
+  "KPSS'yi parçalayacağının kanıtı! ✅",
+  "Görüyorum ki hem zeki hem aşırı tatlısın. 💖",
+  "İşte benim zeki sevgilim! Aynen böyle devam."
+];
+
+let mevcutSoru = 0;
+let puan = 0;
+let cevaplandi = false;
+
+function sinaviBaslat(){
+  document.getElementById('cover').classList.remove('active');
+  document.getElementById('soruEkrani').classList.add('active');
+  mevcutSoru = 0; puan = 0; cevaplandi = false;
+  soruyuGoster();
+}
+
+function soruyuGoster(){
+  cevaplandi = false;
+  const s = sorular[mevcutSoru];
+  document.getElementById('soruNo').innerText = mevcutSoru + 1;
+  document.getElementById('toplamSoru').innerText = sorular.length;
+  document.getElementById('puanGoster').innerText = "PUAN: " + puan;
+  document.getElementById('ilerlemeCubugu').style.width = (mevcutSoru / sorular.length * 100) + "%";
+
+  const etiketEl = document.getElementById('soruEtiket');
+  etiketEl.innerText = s.etiket;
+  etiketEl.className = "etiket " + (s.tip === "bonus" ? "bonus" : "kpss");
+
+  document.getElementById('soruMetni').innerText = s.soru;
+
+  const harfler = ["A","B","C","D"];
+  const kapsayici = document.getElementById('secenekler');
+  kapsayici.innerHTML = "";
+  s.secenekler.forEach((metin, i) => {
+    const div = document.createElement('div');
+    div.className = "secenek";
+    div.onclick = () => cevapSec(i);
+    div.innerHTML = `
+      <div class="kabarcik">
+        <span>${harfler[i]}</span>
+        <svg viewBox="0 0 30 30"><path d="M15 4 a11 11 0 1 1 -0.1 0"/></svg>
+      </div>
+      <div class="secenek-metin">${metin}</div>`;
+    kapsayici.appendChild(div);
+  });
+
+  document.getElementById('geriBildirim').className = "geri-bildirim";
+  document.getElementById('geriBildirim').innerText = "";
+  document.getElementById('devamBtn').style.display = "none";
+}
+
+function cevapSec(secilenIndex){
+  if(cevaplandi) return;
+  cevaplandi = true;
+  const s = sorular[mevcutSoru];
+  const dogruMu = secilenIndex === s.dogru;
+  if(dogruMu) puan++;
+
+  const secenekEls = document.querySelectorAll('#secenekler .secenek');
+  secenekEls.forEach((el, i) => {
+    el.classList.add('disabled');
+    if(i === secilenIndex){
+      el.classList.add('dolu', dogruMu ? 'dogru' : 'yanlis');
+    }
+    if(i === s.dogru){
+      el.classList.add('dogru-vurgu');
+    } else if(i === secilenIndex && !dogruMu){
+      el.classList.add('yanlis-vurgu');
+    }
+  });
+
+  const geri = document.getElementById('geriBildirim');
+  const mesajListesi = dogruMu ? dogruMesajlari : yanlisMesajlari;
+  geri.innerText = mesajListesi[Math.floor(Math.random()*mesajListesi.length)];
+  geri.classList.add('gorunur');
+
+  document.getElementById('puanGoster').innerText = "PUAN: " + puan;
+  document.getElementById('devamBtn').style.display = "block";
+}
+
+function sonrakiSoru(){
+  mevcutSoru++;
+  if(mevcutSoru >= sorular.length){
+    sinaviBitir();
+  } else {
+    soruyuGoster();
+  }
+}
+
+function sinaviBitir(){
+  document.getElementById('ilerlemeCubugu').style.width = "100%";
+  document.getElementById('soruEkrani').classList.remove('active');
+  document.getElementById('sonuc').classList.add('active');
+  document.getElementById('dogruSayisi').innerText = puan;
+  document.getElementById('toplamSoru2').innerText = sorular.length;
+  setTimeout(() => {
+    document.getElementById('muhurEl').classList.add('goster');
+    kalpYagdir();
+  }, 300);
+}
+
+function sinaviYenidenBaslat(){
+  document.getElementById('sonuc').classList.remove('active');
+  document.getElementById('muhurEl').classList.remove('goster');
+  document.getElementById('cover').classList.add('active');
+}
+
+function kalpYagdir(){
+  const kap = document.getElementById('kalpYagmuru');
+  for(let i=0;i<24;i++){
+    setTimeout(() => {
+      const kalp = document.createElement('div');
+      kalp.className = 'kalp-tanesi';
+      kalp.innerText = ['💗','❤️','💕'][Math.floor(Math.random()*3)];
+      kalp.style.left = Math.random()*100 + 'vw';
+      kalp.style.animationDuration = (3 + Math.random()*2) + 's';
+      kalp.style.fontSize = (1 + Math.random()*1.2) + 'em';
+      kap.appendChild(kalp);
+      setTimeout(() => kalp.remove(), 6000);
+    }, i * 80);
+  }
+}
+
+document.getElementById('toplamSoruGoster').innerText = sorular.length;
+</script>
+
+</body>
+</html>
